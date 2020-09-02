@@ -15,6 +15,7 @@ class RulerViewActivity : AppCompatActivity() {
         rulerView.setOnValueChangedListener(object : RulerView.OnValueChangedListener {
             override fun onValueChanged(value: Int) {
                 valueTv.text = value.toString()
+                valueTv.setTextColor(rulerView.getIndicatorColor())
             }
         })
     }
