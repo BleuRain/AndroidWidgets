@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Widget</string>
     <string name="ruler_view">Ruler View</string>
+    <string name="ruler_value_with_unit">%s cm</string>
 </resources>
