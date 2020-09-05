@@ -18,5 +18,8 @@ class RulerViewActivity : AppCompatActivity() {
                 valueTv.setTextColor(rulerView.getIndicatorColor())
             }
         })
+        rulerView.setOnClickListener {
+            rulerView.setCurrentValue(20)
+        }
     }
 }

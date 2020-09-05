@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.MotionEvent.*
 import android.view.VelocityTracker
@@ -33,16 +34,41 @@ class RulerView @JvmOverloads constructor(
         private const val DefLineRadius = 12f
 
         private const val DefValueTextSize = 100f
+        private const val DefVelocityX = 1000
     }
 
+    private val gestureDetector =
+        GestureDetector(getContext(), object : GestureDetector.OnGestureListener {
+            override fun onDown(e: MotionEvent?) = true
+
+            override fun onShowPress(e: MotionEvent?) = Unit
+
+            override fun onSingleTapUp(e: MotionEvent?) = performClick()
+
+            override fun onScroll(
+                e1: MotionEvent?,
+                e2: MotionEvent?,
+                distanceX: Float,
+                distanceY: Float
+            ) = false
+
+            override fun onLongPress(e: MotionEvent?) = Unit
+
+            override fun onFling(
+                e1: MotionEvent?,
+                e2: MotionEvent?,
+                velocityX: Float,
+                velocityY: Float
+            ) = false
+        })
     private val paint = Paint()
     private val textPaint = Paint()
 
     @ColorInt
-    var startColor = Color.parseColor(DefStartColor)
+    private var startColor = Color.parseColor(DefStartColor)
 
     @ColorInt
-    var endColor = Color.parseColor(DefEndColor)
+    private var endColor = Color.parseColor(DefEndColor)
 
     // Indicator
     private val indicatorRadius = DefIndicatorRadius
@@ -65,6 +91,7 @@ class RulerView @JvmOverloads constructor(
     // Text
     private val valueTextSize = DefValueTextSize
     private var textY = 0f
+    private val textHeight: Float
 
     private val scroller = Scroller(this.context)
     private var velocityTracker = VelocityTracker.obtain()
@@ -74,6 +101,7 @@ class RulerView @JvmOverloads constructor(
     private var viewWidth = 0
     private var viewHeight = 0
     private var rulerWidth = 0f
+    private var rulerHeight = 0f
     private var drawBaseX = 0f
     private var moveStartX = 0f
     private var moveOffset = 0f
@@ -83,6 +111,12 @@ class RulerView @JvmOverloads constructor(
         textPaint.textSize = valueTextSize
         textPaint.style = Paint.Style.FILL
         textPaint.typeface = Typeface.DEFAULT_BOLD
+        textHeight = textPaint.fontMetrics.let { fontMetrics ->
+            fontMetrics.descent - fontMetrics.ascent
+        }
+        rulerWidth = (endValue - startValue) * (lineWidth + lineSpace).toFloat()
+        rulerHeight =
+            indicatorRadius * 2 + indicatorMarginBottom + maxLineHeight + lineBoxMarginBottom + textHeight
     }
 
     override fun onAttachedToWindow() {
@@ -99,9 +133,25 @@ class RulerView @JvmOverloads constructor(
         indicatorCentralX = viewWidth / 2f
         indicatorCentralY = indicatorRadius
 
-        rulerWidth = (endValue - startValue) * (lineWidth + lineSpace).toFloat()
         lineY = indicatorRadius * 2 + indicatorMarginBottom
         textY = lineY + maxLineHeight + lineBoxMarginBottom + valueTextSize
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val width = MeasureSpec.getSize(widthMeasureSpec)
+        var height = MeasureSpec.getSize(heightMeasureSpec)
+        when (MeasureSpec.getMode(heightMeasureSpec)) {
+            MeasureSpec.AT_MOST -> {
+                height = rulerHeight.toInt().coerceAtMost(height)
+            }
+            MeasureSpec.EXACTLY -> {
+                // Do nothing
+            }
+            MeasureSpec.UNSPECIFIED -> {
+                height = rulerHeight.toInt()
+            }
+        }
+        setMeasuredDimension(width, height)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -114,7 +164,6 @@ class RulerView @JvmOverloads constructor(
                 scroller.abortAnimation()
                 deltaX = getRealOffsetX()
                 moveOffset = 0f
-                return true
             }
             ACTION_MOVE -> {
                 moveOffset = event.x - moveStartX
@@ -140,7 +189,7 @@ class RulerView @JvmOverloads constructor(
                 postInvalidate()
             }
         }
-        return super.onTouchEvent(event)
+        return gestureDetector.onTouchEvent(event)
     }
 
     override fun computeScroll() {
@@ -152,6 +201,32 @@ class RulerView @JvmOverloads constructor(
                 moveOffset = 0f
             }
             changeValue()
+            postInvalidate()
+        }
+    }
+
+    fun getCurrentValue(): Int {
+        return currentValue
+    }
+
+    fun setCurrentValue(value: Int) {
+        if (value != currentValue) {
+            if (!scroller.isFinished) {
+                scroller.abortAnimation()
+            }
+            scroller.fling(
+                0,
+                0,
+                DefVelocityX,
+                0,
+                Int.MIN_VALUE,
+                Int.MAX_VALUE,
+                0,
+                0,
+            )
+            scroller.finalX =
+                -(value - currentValue) * (lineWidth + lineSpace) + deltaX.toInt() % (lineWidth + lineSpace)
+            computeScrollerFinalX()
             postInvalidate()
         }
     }
