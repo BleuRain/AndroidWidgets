@@ -9,7 +9,7 @@
 Gradle:
 
 ```
-implementation(group: 'io.bleu.androidx.widget', name: 'rulerview', version: '1.0.0', ext: 'aar')
+implementation 'io.bleu.androidx.widget:rulerview:1.0.0'
 ```
 
 # Thanks To
