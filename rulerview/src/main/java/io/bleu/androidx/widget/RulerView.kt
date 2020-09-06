@@ -39,9 +39,9 @@ class RulerView @JvmOverloads constructor(
 
     private val gestureDetector =
         GestureDetector(getContext(), object : GestureDetector.SimpleOnGestureListener() {
-            override fun onDown(e: MotionEvent?) = true
+            override fun onDown(e: MotionEvent) = true
 
-            override fun onSingleTapConfirmed(e: MotionEvent?) = performClick()
+            override fun onSingleTapConfirmed(e: MotionEvent) = performClick()
         })
     private val paint = Paint()
     private val textPaint = Paint()

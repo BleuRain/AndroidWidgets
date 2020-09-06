@@ -20,6 +20,7 @@ class RulerViewActivity : AppCompatActivity() {
         })
         rulerView.setOnClickListener {
             rulerView.setCurrentValue(20)
+            rulerView.getCurrentValue()
         }
     }
 }
