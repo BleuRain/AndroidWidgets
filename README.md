@@ -4,6 +4,14 @@
 
 ![avatar](art/preview.gif)
 
+# Usage
+
+```
+<io.bleu.androidx.widget.RulerView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />
+```
+
 # Download
 
 Gradle:
