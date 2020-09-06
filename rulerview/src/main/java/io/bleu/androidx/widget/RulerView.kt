@@ -38,28 +38,10 @@ class RulerView @JvmOverloads constructor(
     }
 
     private val gestureDetector =
-        GestureDetector(getContext(), object : GestureDetector.OnGestureListener {
+        GestureDetector(getContext(), object : GestureDetector.SimpleOnGestureListener() {
             override fun onDown(e: MotionEvent?) = true
 
-            override fun onShowPress(e: MotionEvent?) = Unit
-
-            override fun onSingleTapUp(e: MotionEvent?) = performClick()
-
-            override fun onScroll(
-                e1: MotionEvent?,
-                e2: MotionEvent?,
-                distanceX: Float,
-                distanceY: Float
-            ) = false
-
-            override fun onLongPress(e: MotionEvent?) = Unit
-
-            override fun onFling(
-                e1: MotionEvent?,
-                e2: MotionEvent?,
-                velocityX: Float,
-                velocityY: Float
-            ) = false
+            override fun onSingleTapConfirmed(e: MotionEvent?) = performClick()
         })
     private val paint = Paint()
     private val textPaint = Paint()
